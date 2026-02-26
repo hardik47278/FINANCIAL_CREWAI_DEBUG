@@ -1,0 +1,57 @@
+# job.py
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
+
+from celery_app import celery_app
+
+from crewai import Crew, Process
+from agent import financial_analyst, verifier, investment_advisor, risk_assessor  # ✅ FIXED: added investment_advisor, risk_assessor
+from task import (
+    analyze_financial_document,
+    investment_analysis,
+    risk_assessment,
+    verification,
+)
+
+
+@celery_app.task(bind=True, name="run_financial_analysis")
+def run_financial_analysis(self, query: str, file_path: str):
+    try:
+        financial_crew = Crew(
+            agents=[financial_analyst, verifier, investment_advisor, risk_assessor],  # ✅ FIXED: added investment_advisor, risk_assessor
+            tasks=[
+                analyze_financial_document,  # ✅ FIXED: runs first so verification can use its context
+                verification,               # ✅ FIXED: now runs after analyze_financial_document
+                investment_analysis,
+                risk_assessment,
+            ],
+            process=Process.sequential,
+            verbose=True,
+        )
+
+        _ = financial_crew.kickoff(
+            {
+                "query": query,
+                "path": file_path,
+            }
+        )
+
+        
+        return {
+            "verification": getattr(verification.output, "raw", None),
+            "analysis": getattr(analyze_financial_document.output, "raw", None),
+            "investment_analysis": getattr(investment_analysis.output, "raw", None),
+            "risk_assessment": getattr(risk_assessment.output, "raw", None),
+            "market_insights": getattr(analyze_financial_document.output, "raw", None),
+        }
+
+    finally:
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
