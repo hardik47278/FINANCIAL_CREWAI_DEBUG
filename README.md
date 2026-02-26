@@ -69,7 +69,7 @@ FastAPI:
 🛠️ Setup & Installation
 
 git clone https://github.com/hardik47278/FINANCIAL_CREWAI_DEBUG.git
-cd
+cd FINANCIAL_CREWAI_DEBUG
 
 2️⃣ Create Virtual Environment (Python 3.11 Required)
 python 3.11 -m venv venv
@@ -224,6 +224,7 @@ Improvements:
 
 
                   
+
 
 
 
