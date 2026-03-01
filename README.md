@@ -103,6 +103,8 @@ cd FINANCIAL_CREWAI_DEBUG
 
 ```bash
 python -m venv venv
+or 
+python -m venv venv311
 venv\Scripts\activate
 ```
 
@@ -243,3 +245,4 @@ Original prompts caused hallucinations and inconsistent outputs.
 ✔ Real-world debugging experience  
 
 ---
+
